@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration scan="true">
+
+    <springProperty scope="context" name="component" source="splunk.hec.component" defaultValue=""/>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <charset>utf-8</charset>
+            <Pattern>%date{"yyyy-MM-dd'T'HH:mm:ss,SSSZ"} comp=${component} [%thread] %-5level %logger - %msg%n</Pattern>
+        </encoder>
+    </appender>
+    <springProfile name="splunk">
+        <springProperty scope="context" name="splunk-scheme" source="splunk.hec.scheme" defaultValue="https"/>
+        <springProperty scope="context" name="splunk-host" source="splunk.hec.tcpserverlist" defaultValue="localhost"/>
+        <springProperty scope="context" name="splunk-token" source="splunk.hec.token" defaultValue=""/>
+        <springProperty scope="context" name="splunk-index" source="splunk.hec.index" defaultValue=""/>
+        <appender name="SPLUNK" class="com.splunk.logging.HttpEventCollectorLogbackAppender">
+            <url>${splunk-scheme}://${splunk-host}</url>
+            <token>${splunk-token}</token>
+            <index>${splunk-index}</index>
+            <disableCertificateValidation>true</disableCertificateValidation>
+            <layout class="ch.qos.logback.classic.PatternLayout">
+                <pattern>%date{"yyyy-MM-dd'T'HH:mm:ss,SSSZ"} comp=${component} [%thread] %-5level %logger - %msg%n
+                </pattern>
+            </layout>
+            <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+                <level>INFO</level>
+            </filter>
+        </appender>
+    </springProfile>
+    <springProfile name="!splunk">
+        <appender name="SPLUNK" class="ch.qos.logback.core.helpers.NOPAppender"/>
+    </springProfile>
+
+    <logger name="our.root.package" level="DEBUG"/>
+    <logger name="org.apache" level="OFF"/>
+
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+
+    <root level="WARN">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="SPLUNK"/>
+    </root>
+
+</configuration>
