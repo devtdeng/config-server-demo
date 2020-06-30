@@ -9,8 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 @SpringBootApplication
 @RestController
 public class ConfigServerDemoApplication {
-	@Value("${current_profile}")
-	String profile;
+	@Value("${mysecret}")
+	String mysecret;
 
 	public static void main(String[] args) {
 		SpringApplication.run(ConfigServerDemoApplication.class, args);
@@ -18,6 +18,6 @@ public class ConfigServerDemoApplication {
 
 	@RequestMapping("/")
     public String home() {    
-        return "The current profile from config server is: " + profile;
+        return "mysecret from config server is: " + mysecret;
     }
 }
